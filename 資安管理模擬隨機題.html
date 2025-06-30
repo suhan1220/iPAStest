@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>資訊安全模擬測驗</title>
+  <style>
+    body { font-family: "Microsoft JhengHei", sans-serif; padding: 20px; line-height: 1.6; }
+    .question { margin-bottom: 20px; }
+    .options label { display: block; }
+    .result { font-weight: bold; margin-top: 5px; display: none; }
+    .correct { color: green; }
+    .wrong { color: red; }
+    button { padding: 10px 16px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+<h1>資訊安全模擬測驗</h1>
+<div id="quizContainer"></div>
+<button onclick="submitQuiz()">送出作答</button>
+
+<script>
+let questions = [];
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+function loadQuizFromJSON() {
+  fetch("quiz_questions.json")
+    .then(response => response.json())
+    .then(data => {
+      shuffle(data);
+      questions = data.slice(0, 10);
+      createQuiz();
+    })
+    .catch(error => {
+      console.error("載入題目時發生錯誤：", error);
+    });
+}
+
+function createQuiz() {
+
+  const container = document.getElementById("quizContainer");
+  questions.forEach((q, i) => {
+    const div = document.createElement("div");
+    div.className = "question";
+    let html = `<strong>${i + 1}. ${q.question}</strong><div class="options">`;
+    q.options.forEach((opt, idx) => {
+      const letter = "ABCD"[idx];
+      html += `<label><input type="radio" name="q${i}" value="${letter}"> (${letter}) ${opt}</label>`;
+    });
+    html += `</div><div id="r${i}" class="result"></div>`;
+    div.innerHTML = html;
+    container.appendChild(div);
+  });
+}
+
+function submitQuiz() {
+  questions.forEach((q, i) => {
+    const selected = document.querySelector(`input[name="q${i}"]:checked`);
+    const resultDiv = document.getElementById("r" + i);
+    if (selected) {
+      if (selected.value === q.answer) {
+        resultDiv.textContent = "✔ 正確";
+        resultDiv.className = "result correct";
+      } else {
+        resultDiv.textContent = `✘ 錯誤，正確答案是 (${q.answer})`;
+        resultDiv.className = "result wrong";
+      }
+    } else {
+      resultDiv.textContent = `未作答，正確答案是 (${q.answer})`;
+      resultDiv.className = "result wrong";
+    }
+    resultDiv.style.display = "block";
+  });
+}
+
+loadQuizFromJSON();;
+</script>
+</body>
+</html>
