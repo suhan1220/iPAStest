@@ -30,7 +30,7 @@ function shuffle(array) {
 }
 
 function loadQuizFromJSON() {
-  fetch("quiz_questions.json")
+  fetch("https://suhan1220.github.io/iPAStest/quiz_questions.json")
     .then(response => response.json())
     .then(data => {
       shuffle(data);
